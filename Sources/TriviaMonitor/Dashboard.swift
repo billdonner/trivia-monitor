@@ -28,8 +28,9 @@ class Dashboard: @unchecked Sendable {
             self?.handleKeyPress(key)
         }
 
-        // Hide cursor and clear screen
-        print(ANSIRenderer.hideCursor(), terminator: "")
+        // Enter alternate screen buffer and hide cursor
+        print(ANSIRenderer.enterAltScreen() + ANSIRenderer.hideCursor(), terminator: "")
+        fflush(stdout)
 
         var lastRender = Date.distantPast
         let refreshInterval = TimeInterval(config.refreshInterval)
@@ -118,8 +119,8 @@ class Dashboard: @unchecked Sendable {
         // Footer
         output += Widgets.footer(state: state, config: config)
 
-        // Move cursor home, clear screen, then output
-        print(ANSIRenderer.moveTo(row: 1, col: 1) + ANSIRenderer.clearToEnd() + output, terminator: "")
+        // Clear screen and output
+        print(ANSIRenderer.clearScreen() + output, terminator: "")
         fflush(stdout)
     }
 
@@ -127,9 +128,9 @@ class Dashboard: @unchecked Sendable {
         // Restore terminal
         keyboard.disable()
 
-        // Show cursor and move to bottom
-        print(ANSIRenderer.showCursor())
-        print("\n" + ANSIRenderer.cyan("Monitor stopped."))
+        // Exit alternate screen and show cursor
+        print(ANSIRenderer.exitAltScreen() + ANSIRenderer.showCursor())
+        print(ANSIRenderer.cyan("Monitor stopped."))
 
         do {
             try await fetcher.shutdown()

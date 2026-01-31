@@ -47,6 +47,14 @@ struct ANSIRenderer {
         "\u{001B}[J"
     }
 
+    static func enterAltScreen() -> String {
+        "\u{001B}[?1049h"
+    }
+
+    static func exitAltScreen() -> String {
+        "\u{001B}[?1049l"
+    }
+
     // MARK: - Colors
 
     static func color(_ text: String, _ color: ANSIColor) -> String {
