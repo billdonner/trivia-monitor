@@ -10,11 +10,21 @@ swift run TriviaMonitor
 
 # With options
 swift run TriviaMonitor --server http://localhost:8080 --api-key xxx --refresh 5
-
-# Release build
-swift build -c release
-cp .build/release/TriviaMonitor /usr/local/bin/
 ```
+
+## Global Installation
+
+Install to `~/bin` for system-wide access:
+
+```bash
+swift build -c release
+cp .build/release/TriviaMonitor ~/bin/
+
+# Then run from anywhere:
+TriviaMonitor
+```
+
+Note: `~/bin` is added to PATH in `~/.zshrc`.
 
 ## Data Sources
 
