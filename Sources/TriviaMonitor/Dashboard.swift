@@ -118,13 +118,9 @@ class Dashboard: @unchecked Sendable {
         // Footer
         output += Widgets.footer(state: state, config: config)
 
-        // Clear screen and move cursor home, then output all at once
-        let fullOutput = ANSIRenderer.moveTo(row: 1, col: 1) + ANSIRenderer.clearToEnd() + output
-
-        // Write directly to stdout for atomic output
-        if let data = fullOutput.data(using: .utf8) {
-            FileHandle.standardOutput.write(data)
-        }
+        // Move cursor home, clear screen, then output
+        print(ANSIRenderer.moveTo(row: 1, col: 1) + ANSIRenderer.clearToEnd() + output, terminator: "")
+        fflush(stdout)
     }
 
     private func cleanup() async {
