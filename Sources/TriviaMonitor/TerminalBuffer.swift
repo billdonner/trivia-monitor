@@ -28,11 +28,7 @@ class TerminalBuffer {
 
             if oldLine != newLine {
                 // Move cursor to line i+1 (1-indexed), column 1
-                print("\u{001B}[\(i + 1);1H", terminator: "")
-                // Clear the line
-                print("\u{001B}[2K", terminator: "")
-                // Print new content
-                print(newLine, terminator: "")
+                print("\u{001B}[\(i + 1);1H\u{001B}[2K\(newLine)", terminator: "")
             }
         }
 
