@@ -5,6 +5,7 @@ class Dashboard: @unchecked Sendable {
     private let fetcher: DataFetcher
     private let launcher: ProcessLauncher
     private let keyboard: KeyboardInput
+    private let terminalBuffer: TerminalBuffer
     private var isRunning = true
     private var monitorStats = MonitorStats()
 
@@ -13,6 +14,7 @@ class Dashboard: @unchecked Sendable {
         self.fetcher = DataFetcher(config: config)
         self.launcher = ProcessLauncher(triviaBasePath: config.triviaBasePath)
         self.keyboard = KeyboardInput()
+        self.terminalBuffer = TerminalBuffer()
     }
 
     func run() async {
@@ -119,23 +121,17 @@ class Dashboard: @unchecked Sendable {
         // Footer
         lines.append(contentsOf: Widgets.footer(state: state, config: config).components(separatedBy: "\n"))
 
-        // Clear screen and move cursor home
-        print("\u{001B}[2J\u{001B}[H", terminator: "")
-
-        // Print each line
-        for line in lines where !line.isEmpty {
-            print(line)
-        }
-
-        // Ensure output is flushed
-        fflush(stdout)
+        // Filter empty lines and render with double-buffering
+        let filteredLines = lines.filter { !$0.isEmpty }
+        terminalBuffer.render(filteredLines)
     }
 
     private func cleanup() async {
         // Restore terminal
         keyboard.disable()
 
-        // Show cursor
+        // Clear and show cursor
+        terminalBuffer.clear()
         print(ANSIRenderer.showCursor())
         print(ANSIRenderer.cyan("Monitor stopped."))
 
