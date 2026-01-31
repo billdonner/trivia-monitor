@@ -105,31 +105,32 @@ struct Widgets {
             let line2 = "Fetched: \(fetchedStr)   Added: \(addedStr)   Duplicates: \(dupsStr)   Errors: \(errorsStr)"
             output += ANSIRenderer.row(line2)
 
-            // Provider status
+            // Provider status (3 per row max)
             if !daemon.providers.isEmpty {
                 output += ANSIRenderer.sectionMiddle()
 
-                var providerLine = ""
-                for (index, provider) in daemon.providers.prefix(5).enumerated() {
+                // First row: up to 3 providers
+                var line1 = ""
+                for (index, provider) in daemon.providers.prefix(3).enumerated() {
                     let dot = ANSIRenderer.providerDot(enabled: provider.enabled)
                     let status = provider.enabled ? "on" : "off"
-                    let name = String(provider.name.prefix(12))
-                    providerLine += "\(dot) \(name) [\(status)]"
-                    if index < daemon.providers.count - 1 && index < 4 {
-                        providerLine += "  "
+                    let name = String(provider.name.prefix(10))
+                    line1 += "\(dot) \(name) [\(status)]"
+                    if index < 2 && index < daemon.providers.count - 1 {
+                        line1 += "  "
                     }
                 }
-                output += ANSIRenderer.row(providerLine)
+                output += ANSIRenderer.row(line1)
 
                 // Second row if more than 3 providers
                 if daemon.providers.count > 3 {
                     var line2 = ""
-                    for (index, provider) in daemon.providers.dropFirst(3).prefix(2).enumerated() {
+                    for (index, provider) in daemon.providers.dropFirst(3).prefix(3).enumerated() {
                         let dot = ANSIRenderer.providerDot(enabled: provider.enabled)
                         let status = provider.enabled ? "on" : "off"
-                        let name = String(provider.name.prefix(12))
+                        let name = String(provider.name.prefix(10))
                         line2 += "\(dot) \(name) [\(status)]"
-                        if index < 1 {
+                        if index < 2 && index < daemon.providers.count - 4 {
                             line2 += "  "
                         }
                     }

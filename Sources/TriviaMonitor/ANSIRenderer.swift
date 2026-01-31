@@ -99,7 +99,7 @@ struct ANSIRenderer {
 
     static func row(_ content: String) -> String {
         let stripped = stripANSI(content)
-        let padding = max(0, width - stripped.count)
+        let padding = max(1, width - stripped.count)
         return "│ " + content + String(repeating: " ", count: padding - 1) + "│\n"
     }
 
