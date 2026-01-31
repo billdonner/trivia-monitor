@@ -95,7 +95,8 @@ class Dashboard: @unchecked Sendable {
     }
 
     private func render(state: DashboardState) {
-        var output = ANSIRenderer.clearScreen()
+        // Build complete output first
+        var output = ""
 
         // Header with status message
         let statusMsg = launcher.getStatus()
@@ -117,8 +118,13 @@ class Dashboard: @unchecked Sendable {
         // Footer
         output += Widgets.footer(state: state, config: config)
 
-        print(output, terminator: "")
-        fflush(stdout)
+        // Clear screen and move cursor home, then output all at once
+        let fullOutput = ANSIRenderer.moveTo(row: 1, col: 1) + ANSIRenderer.clearToEnd() + output
+
+        // Write directly to stdout for atomic output
+        if let data = fullOutput.data(using: .utf8) {
+            FileHandle.standardOutput.write(data)
+        }
     }
 
     private func cleanup() async {

@@ -43,6 +43,10 @@ struct ANSIRenderer {
         "\u{001B}[\(row);\(col)H"
     }
 
+    static func clearToEnd() -> String {
+        "\u{001B}[J"
+    }
+
     // MARK: - Colors
 
     static func color(_ text: String, _ color: ANSIColor) -> String {
