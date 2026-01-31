@@ -29,8 +29,8 @@ class Dashboard: @unchecked Sendable {
             self?.handleKeyPress(key)
         }
 
-        // Enter alternate screen buffer and hide cursor
-        print(ANSIRenderer.enterAltScreen() + ANSIRenderer.hideCursor(), terminator: "")
+        // Hide cursor
+        print(ANSIRenderer.hideCursor(), terminator: "")
         fflush(stdout)
 
         var lastRender = Date.distantPast
@@ -101,39 +101,45 @@ class Dashboard: @unchecked Sendable {
 
     private func render(state: DashboardState) {
         // Build complete output first
-        var output = ""
+        var lines: [String] = []
 
         // Header with status message
         let statusMsg = launcher.getStatus()
-        output += ANSIRenderer.headerBox(title: "TRIVIA MONITOR", statusMessage: statusMsg)
-        output += "\n"
+        lines.append(contentsOf: ANSIRenderer.headerBox(title: "TRIVIA MONITOR", statusMessage: statusMsg).components(separatedBy: "\n"))
 
         // Server section
-        output += Widgets.serverWidget(state: state, config: config)
-        output += "\n"
+        lines.append(contentsOf: Widgets.serverWidget(state: state, config: config).components(separatedBy: "\n"))
+        lines.append("")
 
         // Validation section
-        output += Widgets.validationWidget(state: state)
-        output += "\n"
+        lines.append(contentsOf: Widgets.validationWidget(state: state).components(separatedBy: "\n"))
+        lines.append("")
 
         // Daemon section
-        output += Widgets.daemonWidget(state: state)
-        output += "\n"
+        lines.append(contentsOf: Widgets.daemonWidget(state: state).components(separatedBy: "\n"))
+        lines.append("")
 
         // Footer
-        output += Widgets.footer(state: state, config: config)
+        lines.append(contentsOf: Widgets.footer(state: state, config: config).components(separatedBy: "\n"))
 
-        // Clear screen and output
-        print(ANSIRenderer.clearScreen() + output, terminator: "")
-        fflush(stdout)
+        // Clear screen, move home, then print each line
+        var output = "\u{001B}[2J\u{001B}[H"
+        for line in lines {
+            output += line + "\n"
+        }
+
+        // Write all at once using Darwin write for atomic output
+        output.withCString { ptr in
+            _ = Darwin.write(STDOUT_FILENO, ptr, strlen(ptr))
+        }
     }
 
     private func cleanup() async {
         // Restore terminal
         keyboard.disable()
 
-        // Exit alternate screen and show cursor
-        print(ANSIRenderer.exitAltScreen() + ANSIRenderer.showCursor())
+        // Show cursor
+        print(ANSIRenderer.showCursor())
         print(ANSIRenderer.cyan("Monitor stopped."))
 
         do {
