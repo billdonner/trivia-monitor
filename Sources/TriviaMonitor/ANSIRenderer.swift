@@ -58,7 +58,7 @@ struct ANSIRenderer {
 
     // MARK: - Box Drawing
 
-    static func headerBox(title: String) -> String {
+    static func headerBox(title: String, statusMessage: String? = nil) -> String {
         let titlePart = " \(title) "
         let leftPadding = (width - titlePart.count) / 2
         let rightPadding = width - titlePart.count - leftPadding
@@ -68,9 +68,16 @@ struct ANSIRenderer {
         result += bold(cyan(titlePart))
         result += cyan(String(repeating: "═", count: rightPadding) + "╗") + "\n"
 
-        let hint = "[Ctrl+C: Exit]"
+        let hint = "[S: Start All] [Q: Quit]"
         let spaces = width - hint.count - 1
         result += cyan("║") + String(repeating: " ", count: spaces) + gray(hint) + " " + cyan("║") + "\n"
+
+        // Show status message if present
+        if let msg = statusMessage {
+            let msgSpaces = max(0, width - stripANSI(msg).count - 1)
+            result += cyan("║") + " " + yellow(msg) + String(repeating: " ", count: msgSpaces) + cyan("║") + "\n"
+        }
+
         result += cyan("╚" + String(repeating: "═", count: width) + "╝") + "\n"
 
         return result

@@ -3,11 +3,15 @@ import Foundation
 class Dashboard: @unchecked Sendable {
     private let config: MonitorConfig
     private let fetcher: DataFetcher
+    private let launcher: ProcessLauncher
+    private let keyboard: KeyboardInput
     private var isRunning = true
 
     init(config: MonitorConfig) {
         self.config = config
         self.fetcher = DataFetcher(config: config)
+        self.launcher = ProcessLauncher(triviaBasePath: config.triviaBasePath)
+        self.keyboard = KeyboardInput()
     }
 
     func run() async {
@@ -19,19 +23,27 @@ class Dashboard: @unchecked Sendable {
         }
         signalSource.resume()
 
+        // Setup keyboard input
+        keyboard.enable { [weak self] key in
+            self?.handleKeyPress(key)
+        }
+
         // Hide cursor and clear screen
         print(ANSIRenderer.hideCursor(), terminator: "")
 
         while isRunning {
+            // Poll for keyboard input
+            keyboard.poll()
+
             // Fetch all data
             let state = await fetcher.fetchAll()
 
             // Render dashboard
             render(state: state)
 
-            // Wait for refresh interval
+            // Wait for refresh interval (shorter for responsive keyboard)
             do {
-                try await Task.sleep(nanoseconds: UInt64(config.refreshInterval) * 1_000_000_000)
+                try await Task.sleep(nanoseconds: 200_000_000)  // 200ms for responsive input
             } catch {
                 break
             }
@@ -43,11 +55,43 @@ class Dashboard: @unchecked Sendable {
         await cleanup()
     }
 
+    private func handleKeyPress(_ key: Character) {
+        switch key.lowercased() {
+        case "s":
+            startAllComponents()
+        case "q":
+            isRunning = false
+        default:
+            break
+        }
+    }
+
+    private func startAllComponents() {
+        let result = launcher.startAllComponents()
+
+        var message: String
+        if result.started > 0 && result.failed == 0 {
+            message = "Started \(result.started) component(s)"
+            if result.alreadyRunning > 0 {
+                message += ", \(result.alreadyRunning) already running"
+            }
+        } else if result.alreadyRunning > 0 && result.started == 0 && result.failed == 0 {
+            message = "All \(result.alreadyRunning) component(s) already running"
+        } else if result.failed > 0 {
+            message = "Started \(result.started), failed \(result.failed)"
+        } else {
+            message = "No components to start"
+        }
+
+        launcher.setStatus(message, duration: 5)
+    }
+
     private func render(state: DashboardState) {
         var output = ANSIRenderer.clearScreen()
 
-        // Header
-        output += ANSIRenderer.headerBox(title: "TRIVIA MONITOR")
+        // Header with status message
+        let statusMsg = launcher.getStatus()
+        output += ANSIRenderer.headerBox(title: "TRIVIA MONITOR", statusMessage: statusMsg)
         output += "\n"
 
         // Server section
@@ -70,6 +114,9 @@ class Dashboard: @unchecked Sendable {
     }
 
     private func cleanup() async {
+        // Restore terminal
+        keyboard.disable()
+
         // Show cursor and move to bottom
         print(ANSIRenderer.showCursor())
         print("\n" + ANSIRenderer.cyan("Monitor stopped."))

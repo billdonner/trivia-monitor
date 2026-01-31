@@ -21,12 +21,16 @@ struct TriviaMonitor: AsyncParsableCommand {
     @Option(name: [.short, .long], help: "Path to daemon stats file")
     var daemonStats: String = "/tmp/trivia-gen-daemon.stats.json"
 
+    @Option(name: [.long], help: "Base path to trivia projects (default: ~/trivial)")
+    var triviaPath: String = "~/trivial"
+
     mutating func run() async throws {
         let config = MonitorConfig(
             serverURL: server,
             apiKey: apiKey,
             refreshInterval: refresh,
-            daemonStatsPath: daemonStats
+            daemonStatsPath: daemonStats,
+            triviaBasePath: triviaPath
         )
 
         let dashboard = Dashboard(config: config)
