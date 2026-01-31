@@ -71,26 +71,18 @@ struct ANSIRenderer {
     // MARK: - Box Drawing
 
     static func headerBox(title: String, statusMessage: String? = nil) -> String {
-        let titlePart = " \(title) "
-        let leftPadding = (width - titlePart.count) / 2
-        let rightPadding = width - titlePart.count - leftPadding
-
         var result = ""
-        result += cyan("╔" + String(repeating: "═", count: leftPadding))
-        result += bold(cyan(titlePart))
-        result += cyan(String(repeating: "═", count: rightPadding) + "╗") + "\n"
 
-        let hint = "[S: Start All] [Q: Quit]"
-        let spaces = width - hint.count - 1
-        result += cyan("║") + String(repeating: " ", count: spaces) + gray(hint) + " " + cyan("║") + "\n"
+        // Single line header: ═══ TRIVIA MONITOR ═══ [S:Start] [Q:Quit]
+        let hint = "[S:Start] [Q:Quit]"
+        let titlePart = "═══ \(title) ═══"
+        let spacing = width - titlePart.count - hint.count + 2
+        result += cyan(titlePart) + String(repeating: " ", count: max(1, spacing)) + gray(hint) + "\n"
 
         // Show status message if present
         if let msg = statusMessage {
-            let msgSpaces = max(0, width - stripANSI(msg).count - 1)
-            result += cyan("║") + " " + yellow(msg) + String(repeating: " ", count: msgSpaces) + cyan("║") + "\n"
+            result += yellow(msg) + "\n"
         }
-
-        result += cyan("╚" + String(repeating: "═", count: width) + "╝") + "\n"
 
         return result
     }

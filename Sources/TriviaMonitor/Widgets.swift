@@ -22,27 +22,19 @@ struct Widgets {
             output += ANSIRenderer.row(errorLine)
         }
 
-        // Monitor performance stats
+        // Monitor performance stats (compact)
         output += ANSIRenderer.sectionMiddle()
 
         let stats = state.monitorStats
         let latencyStr = String(format: "%.0fms", stats.lastLatencyMs)
-        let avgLatencyStr = String(format: "%.0fms", stats.avgLatencyMs)
         let uptimeStr = ANSIRenderer.formatUptime(stats.monitorUptime)
+        let successRateStr = String(format: "%.0f%%", stats.successRate)
 
-        let pollColor = stats.pollCount > 0 ? ANSIRenderer.cyan : ANSIRenderer.gray
-        let successColor = stats.successCount > 0 ? ANSIRenderer.green : ANSIRenderer.gray
-        let failColor = stats.failureCount > 0 ? ANSIRenderer.red : ANSIRenderer.gray
-
-        let line2 = "Polls: \(pollColor(String(stats.pollCount)))  " +
-                   "OK: \(successColor(String(stats.successCount)))  " +
-                   "Fail: \(failColor(String(stats.failureCount)))  " +
-                   "Latency: \(ANSIRenderer.cyan(latencyStr)) (avg \(avgLatencyStr))"
+        let line2 = "Polls: \(ANSIRenderer.cyan(String(stats.pollCount)))  " +
+                   "Latency: \(ANSIRenderer.cyan(latencyStr))  " +
+                   "Uptime: \(ANSIRenderer.cyan(uptimeStr))  " +
+                   "OK: \(ANSIRenderer.green(successRateStr))"
         output += ANSIRenderer.row(line2)
-
-        let successRateStr = String(format: "%.1f%%", stats.successRate)
-        let line3 = "Monitor uptime: \(ANSIRenderer.cyan(uptimeStr))    Success rate: \(ANSIRenderer.green(successRateStr))"
-        output += ANSIRenderer.row(line3)
 
         output += ANSIRenderer.sectionBottom()
         return output

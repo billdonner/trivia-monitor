@@ -109,29 +109,26 @@ class Dashboard: @unchecked Sendable {
 
         // Server section
         lines.append(contentsOf: Widgets.serverWidget(state: state, config: config).components(separatedBy: "\n"))
-        lines.append("")
 
         // Validation section
         lines.append(contentsOf: Widgets.validationWidget(state: state).components(separatedBy: "\n"))
-        lines.append("")
 
         // Daemon section
         lines.append(contentsOf: Widgets.daemonWidget(state: state).components(separatedBy: "\n"))
-        lines.append("")
 
         // Footer
         lines.append(contentsOf: Widgets.footer(state: state, config: config).components(separatedBy: "\n"))
 
-        // Clear screen, move home, then print each line
-        var output = "\u{001B}[2J\u{001B}[H"
-        for line in lines {
-            output += line + "\n"
+        // Clear screen and move cursor home
+        print("\u{001B}[2J\u{001B}[H", terminator: "")
+
+        // Print each line
+        for line in lines where !line.isEmpty {
+            print(line)
         }
 
-        // Write all at once using Darwin write for atomic output
-        output.withCString { ptr in
-            _ = Darwin.write(STDOUT_FILENO, ptr, strlen(ptr))
-        }
+        // Ensure output is flushed
+        fflush(stdout)
     }
 
     private func cleanup() async {
