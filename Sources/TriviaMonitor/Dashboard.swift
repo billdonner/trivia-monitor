@@ -31,19 +31,27 @@ class Dashboard: @unchecked Sendable {
         // Hide cursor and clear screen
         print(ANSIRenderer.hideCursor(), terminator: "")
 
+        var lastRender = Date.distantPast
+        let refreshInterval = TimeInterval(config.refreshInterval)
+
         while isRunning {
-            // Poll for keyboard input
+            // Poll for keyboard input (non-blocking)
             keyboard.poll()
 
-            // Fetch all data
-            let state = await fetcher.fetchAll()
+            // Only fetch and render at the configured refresh interval
+            let now = Date()
+            if now.timeIntervalSince(lastRender) >= refreshInterval {
+                // Fetch all data
+                let state = await fetcher.fetchAll()
 
-            // Render dashboard
-            render(state: state)
+                // Render dashboard
+                render(state: state)
+                lastRender = now
+            }
 
-            // Wait for refresh interval (shorter for responsive keyboard)
+            // Short sleep for responsive keyboard without screen flicker
             do {
-                try await Task.sleep(nanoseconds: 200_000_000)  // 200ms for responsive input
+                try await Task.sleep(nanoseconds: 100_000_000)  // 100ms keyboard poll
             } catch {
                 break
             }
