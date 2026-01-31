@@ -92,6 +92,42 @@ struct DaemonStats: Codable {
     }
 }
 
+// MARK: - Monitor Performance Stats
+
+struct MonitorStats {
+    var pollCount: Int = 0
+    var successCount: Int = 0
+    var failureCount: Int = 0
+    var totalLatencyMs: Double = 0
+    var lastLatencyMs: Double = 0
+    var monitorStartTime: Date = Date()
+
+    var avgLatencyMs: Double {
+        pollCount > 0 ? totalLatencyMs / Double(pollCount) : 0
+    }
+
+    var successRate: Double {
+        let total = successCount + failureCount
+        return total > 0 ? Double(successCount) / Double(total) * 100 : 0
+    }
+
+    var monitorUptime: TimeInterval {
+        Date().timeIntervalSince(monitorStartTime)
+    }
+
+    mutating func recordSuccess(latencyMs: Double) {
+        pollCount += 1
+        successCount += 1
+        lastLatencyMs = latencyMs
+        totalLatencyMs += latencyMs
+    }
+
+    mutating func recordFailure() {
+        pollCount += 1
+        failureCount += 1
+    }
+}
+
 // MARK: - Dashboard State
 
 struct DashboardState {
@@ -104,4 +140,5 @@ struct DashboardState {
     var serverError: String?
     var validationError: String?
     var daemonError: String?
+    var monitorStats: MonitorStats = MonitorStats()
 }

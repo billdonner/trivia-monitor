@@ -88,9 +88,12 @@ actor DataFetcher {
 
     // MARK: - Fetch All
 
-    func fetchAll() async -> DashboardState {
+    func fetchAll(existingStats: MonitorStats) async -> DashboardState {
         var state = DashboardState()
         state.lastUpdate = Date()
+        state.monitorStats = existingStats
+
+        let startTime = Date()
 
         // Fetch all in parallel
         async let healthResult = fetchServerHealth()
@@ -105,9 +108,12 @@ actor DataFetcher {
             if let uptime = health.uptime {
                 state.serverUptime = ANSIRenderer.formatUptime(uptime)
             }
+            let latencyMs = Date().timeIntervalSince(startTime) * 1000
+            state.monitorStats.recordSuccess(latencyMs: latencyMs)
         case .failure(let error):
             state.serverOnline = false
             state.serverError = error.localizedDescription
+            state.monitorStats.recordFailure()
         }
 
         // Process validation stats

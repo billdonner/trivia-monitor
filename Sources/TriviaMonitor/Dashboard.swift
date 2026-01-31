@@ -6,6 +6,7 @@ class Dashboard: @unchecked Sendable {
     private let launcher: ProcessLauncher
     private let keyboard: KeyboardInput
     private var isRunning = true
+    private var monitorStats = MonitorStats()
 
     init(config: MonitorConfig) {
         self.config = config
@@ -43,7 +44,10 @@ class Dashboard: @unchecked Sendable {
             let now = Date()
             if now.timeIntervalSince(lastRender) >= refreshInterval {
                 // Fetch all data
-                let state = await fetcher.fetchAll()
+                var state = await fetcher.fetchAll(existingStats: monitorStats)
+
+                // Update our copy of monitor stats
+                monitorStats = state.monitorStats
 
                 // Render dashboard
                 render(state: state)
