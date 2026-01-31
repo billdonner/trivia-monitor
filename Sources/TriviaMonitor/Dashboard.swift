@@ -7,6 +7,7 @@ class Dashboard: @unchecked Sendable {
     private let keyboard: KeyboardInput
     private let terminalBuffer: TerminalBuffer
     private var isRunning = true
+    private var forceRefresh = false
     private var monitorStats = MonitorStats()
 
     init(config: MonitorConfig) {
@@ -42,9 +43,10 @@ class Dashboard: @unchecked Sendable {
             // Poll for keyboard input (non-blocking)
             keyboard.poll()
 
-            // Only fetch and render at the configured refresh interval
+            // Only fetch and render at the configured refresh interval (or on force refresh)
             let now = Date()
-            if now.timeIntervalSince(lastRender) >= refreshInterval {
+            if now.timeIntervalSince(lastRender) >= refreshInterval || forceRefresh {
+                forceRefresh = false
                 // Fetch all data
                 let state = await fetcher.fetchAll(existingStats: monitorStats)
 
@@ -74,6 +76,9 @@ class Dashboard: @unchecked Sendable {
         switch key.lowercased() {
         case "s":
             startAllComponents()
+        case "r":
+            forceRefresh = true
+            launcher.setStatus("Refreshing...", duration: 1)
         case "q":
             isRunning = false
         default:

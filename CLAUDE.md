@@ -45,5 +45,6 @@ Note: `~/bin` is added to PATH in `~/.zshrc`.
 ## Key Shortcuts
 
 - `S` - Start all trivia components (trivia-ill server, trivia-gen-daemon)
+- `R` - Force immediate refresh
 - `Q` - Quit monitor
 - `Ctrl+C` - Exit (alternative)
