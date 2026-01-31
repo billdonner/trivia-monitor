@@ -47,6 +47,10 @@ struct ANSIRenderer {
         "\u{001B}[J"
     }
 
+    static func clearLine() -> String {
+        "\u{001B}[2K"
+    }
+
     static func enterAltScreen() -> String {
         "\u{001B}[?1049h"
     }

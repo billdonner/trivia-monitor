@@ -46,7 +46,7 @@ class Dashboard: @unchecked Sendable {
             let now = Date()
             if now.timeIntervalSince(lastRender) >= refreshInterval {
                 // Fetch all data
-                var state = await fetcher.fetchAll(existingStats: monitorStats)
+                let state = await fetcher.fetchAll(existingStats: monitorStats)
 
                 // Update our copy of monitor stats
                 monitorStats = state.monitorStats

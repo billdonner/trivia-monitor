@@ -13,7 +13,7 @@ struct TriviaMonitor: AsyncParsableCommand {
     var server: String = "http://localhost:8080"
 
     @Option(name: [.short, .long], help: "API key for authenticated endpoints")
-    var apiKey: String? = "trivia-admin-key-2024"
+    var apiKey: String = "trivia-admin-key-2024"
 
     @Option(name: [.short, .long], help: "Refresh interval in seconds (default: 3)")
     var refresh: Int = 3

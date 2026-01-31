@@ -28,8 +28,8 @@ actor DataFetcher {
         do {
             var request = HTTPClientRequest(url: config.healthURL)
             request.method = .GET
-            if let apiKey = config.apiKey {
-                request.headers.add(name: "X-Admin-API-Key", value: apiKey)
+            if !config.apiKey.isEmpty {
+                request.headers.add(name: "X-Admin-API-Key", value: config.apiKey)
             }
 
             let response = try await httpClient.execute(request, timeout: .seconds(5))
@@ -58,8 +58,8 @@ actor DataFetcher {
         do {
             var request = HTTPClientRequest(url: config.validationStatsURL)
             request.method = .GET
-            if let apiKey = config.apiKey {
-                request.headers.add(name: "X-Admin-API-Key", value: apiKey)
+            if !config.apiKey.isEmpty {
+                request.headers.add(name: "X-Admin-API-Key", value: config.apiKey)
             }
 
             let response = try await httpClient.execute(request, timeout: .seconds(5))

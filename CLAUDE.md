@@ -34,4 +34,6 @@ cp .build/release/TriviaMonitor /usr/local/bin/
 
 ## Key Shortcuts
 
-- `Ctrl+C` - Exit
+- `S` - Start all trivia components (trivia-ill server, trivia-gen-daemon)
+- `Q` - Quit monitor
+- `Ctrl+C` - Exit (alternative)

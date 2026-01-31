@@ -2,7 +2,7 @@ import Foundation
 
 struct MonitorConfig {
     let serverURL: String
-    let apiKey: String?
+    let apiKey: String
     let refreshInterval: Int
     let daemonStatsPath: String
     let triviaBasePath: String
@@ -17,7 +17,7 @@ struct MonitorConfig {
 
     init(
         serverURL: String = "http://localhost:8080",
-        apiKey: String? = nil,
+        apiKey: String = "",
         refreshInterval: Int = 3,
         daemonStatsPath: String = "/tmp/trivia-gen-daemon.stats.json",
         triviaBasePath: String = "~/trivial"
