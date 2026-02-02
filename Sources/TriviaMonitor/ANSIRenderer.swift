@@ -83,11 +83,6 @@ struct ANSIRenderer {
         let spacing = width - titlePart.count - hint.count + 2
         result += cyan(titlePart) + String(repeating: " ", count: max(1, spacing)) + gray(hint) + "\n"
 
-        // Show status message if present
-        if let msg = statusMessage {
-            result += yellow(msg) + "\n"
-        }
-
         return result
     }
 

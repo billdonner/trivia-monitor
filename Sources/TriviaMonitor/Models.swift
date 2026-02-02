@@ -47,12 +47,18 @@ struct ValidationStats: Codable {
 struct ProviderStatus: Codable {
     let name: String
     let enabled: Bool
-    let questionsAdded: Int?
+    let fetched: Int?
+    let added: Int?
+    let duplicates: Int?
+    let errors: Int?
 
-    init(name: String, enabled: Bool, questionsAdded: Int? = nil) {
+    init(name: String, enabled: Bool, fetched: Int? = nil, added: Int? = nil, duplicates: Int? = nil, errors: Int? = nil) {
         self.name = name
         self.enabled = enabled
-        self.questionsAdded = questionsAdded
+        self.fetched = fetched
+        self.added = added
+        self.duplicates = duplicates
+        self.errors = errors
     }
 }
 

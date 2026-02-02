@@ -139,21 +139,31 @@ struct Widgets {
                           String(format: " %3d%%", dupsPct)
             output += ANSIRenderer.row(dupsLine)
 
-            // Provider status
+            // Provider status with detailed counts
             if !daemon.providers.isEmpty {
                 output += ANSIRenderer.sectionMiddle()
-                output += ANSIRenderer.row(ANSIRenderer.cyan("Providers:"))
+                // Header row
+                let header = ANSIRenderer.padRight("Provider", to: 14) +
+                            ANSIRenderer.padRight("Fetched", to: 10) +
+                            ANSIRenderer.padRight("Added", to: 10) +
+                            ANSIRenderer.padRight("Dups", to: 10) +
+                            "Errors"
+                output += ANSIRenderer.row(ANSIRenderer.cyan(header))
 
                 for provider in daemon.providers {
                     let dot = ANSIRenderer.providerDot(enabled: provider.enabled)
-                    let status = provider.enabled ? ANSIRenderer.green("active") : ANSIRenderer.gray("off")
-                    let countStr: String
-                    if let count = provider.questionsAdded {
-                        countStr = "  (\(count) added)"
-                    } else {
-                        countStr = ""
-                    }
-                    let line = "  \(dot) \(ANSIRenderer.padRight(provider.name, to: 14)) \(status)\(countStr)"
+                    let fetched = provider.fetched ?? 0
+                    let added = provider.added ?? 0
+                    let dups = provider.duplicates ?? 0
+                    let errs = provider.errors ?? 0
+
+                    let nameCol = "\(dot) " + ANSIRenderer.padRight(provider.name, to: 12)
+                    let fetchedCol = ANSIRenderer.padRight(String(fetched), to: 10)
+                    let addedCol = ANSIRenderer.padRight(ANSIRenderer.green(String(added)), to: 10 + 9) // +9 for ANSI codes
+                    let dupsCol = ANSIRenderer.padRight(ANSIRenderer.yellow(String(dups)), to: 10 + 9)
+                    let errsCol = errs > 0 ? ANSIRenderer.red(String(errs)) : "0"
+
+                    let line = nameCol + fetchedCol + addedCol + dupsCol + errsCol
                     output += ANSIRenderer.row(line)
                 }
             }
