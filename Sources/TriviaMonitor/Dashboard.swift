@@ -77,11 +77,21 @@ class Dashboard: @unchecked Sendable {
         case "r":
             forceRefresh = true
             setStatus("Refreshing...", duration: 1)
+        case "w":
+            openWebFrontend()
+            setStatus("Opening web app...", duration: 2)
         case "q":
             isRunning = false
         default:
             break
         }
+    }
+
+    private func openWebFrontend() {
+        let process = Process()
+        process.executableURL = URL(fileURLWithPath: "/usr/bin/open")
+        process.arguments = [config.webFrontendURL]
+        try? process.run()
     }
 
     private func setStatus(_ message: String, duration: TimeInterval) {

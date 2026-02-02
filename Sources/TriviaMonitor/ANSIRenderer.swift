@@ -77,8 +77,8 @@ struct ANSIRenderer {
     static func headerBox(title: String, statusMessage: String? = nil) -> String {
         var result = ""
 
-        // Single line header: ═══ TRIVIA MONITOR ═══ [R:Refresh] [Q:Quit]
-        let hint = "[R:Refresh] [Q:Quit]"
+        // Single line header: ═══ TRIVIA MONITOR ═══ [R:Refresh] [W:Web] [Q:Quit]
+        let hint = "[R:Refresh] [W:Web] [Q:Quit]"
         let titlePart = "═══ \(title) ═══"
         let spacing = width - titlePart.count - hint.count + 2
         result += cyan(titlePart) + String(repeating: " ", count: max(1, spacing)) + gray(hint) + "\n"
@@ -187,5 +187,17 @@ struct ANSIRenderer {
         let formatter = DateFormatter()
         formatter.dateFormat = "HH:mm"
         return formatter.string(from: d)
+    }
+
+    // MARK: - Hyperlinks (OSC 8)
+
+    /// Creates a clickable hyperlink using OSC 8 escape sequence
+    /// Supported by iTerm2, Terminal.app (macOS Sonoma+), and other modern terminals
+    static func hyperlink(_ text: String, url: String) -> String {
+        "\u{001B}]8;;\(url)\u{0007}\(text)\u{001B}]8;;\u{0007}"
+    }
+
+    static func hyperlink(_ text: String, url: String, color: ANSIColor) -> String {
+        "\u{001B}]8;;\(url)\u{0007}\(color.rawValue)\(text)\(ANSIColor.reset.rawValue)\u{001B}]8;;\u{0007}"
     }
 }

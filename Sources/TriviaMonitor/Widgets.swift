@@ -173,8 +173,10 @@ struct Widgets {
     static func footer(state: DashboardState, config: MonitorConfig) -> String {
         let timeStr = ANSIRenderer.formatTime(state.lastUpdate)
         let refreshStr = "\(config.refreshInterval)s"
+        let webLink = ANSIRenderer.hyperlink("Open Web App", url: config.webFrontendURL, color: .cyan)
 
-        return ANSIRenderer.gray("─── Refresh: \(refreshStr) │ Last: \(timeStr) ") +
-               ANSIRenderer.gray(String(repeating: "─", count: 40)) + "\n"
+        return ANSIRenderer.gray("─── Refresh: \(refreshStr) │ Last: \(timeStr) │ [W] ") +
+               webLink +
+               ANSIRenderer.gray(" ─────────────") + "\n"
     }
 }

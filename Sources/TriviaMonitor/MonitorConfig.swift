@@ -6,6 +6,7 @@ struct MonitorConfig {
     let refreshInterval: Int
     let daemonStatsPath: String
     let triviaBasePath: String
+    let webFrontendURL: String
 
     var healthURL: String {
         "\(serverURL)/health"
@@ -20,12 +21,14 @@ struct MonitorConfig {
         apiKey: String = "",
         refreshInterval: Int = 3,
         daemonStatsPath: String = "/tmp/trivia-gen-daemon.stats.json",
-        triviaBasePath: String = "~/trivial"
+        triviaBasePath: String = "~/trivial",
+        webFrontendURL: String = "http://localhost:3000"
     ) {
         self.serverURL = serverURL
         self.apiKey = apiKey
         self.refreshInterval = refreshInterval
         self.daemonStatsPath = daemonStatsPath
         self.triviaBasePath = triviaBasePath
+        self.webFrontendURL = webFrontendURL
     }
 }
