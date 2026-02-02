@@ -7,6 +7,8 @@ struct MonitorConfig {
     let daemonStatsPath: String
     let triviaBasePath: String
     let webFrontendURL: String
+    let iosAppBundleID: String
+    let iosProjectPath: String
 
     var healthURL: String {
         "\(serverURL)/health"
@@ -22,7 +24,9 @@ struct MonitorConfig {
         refreshInterval: Int = 3,
         daemonStatsPath: String = "/tmp/trivia-gen-daemon.stats.json",
         triviaBasePath: String = "~/trivial",
-        webFrontendURL: String = "http://localhost:3000"
+        webFrontendURL: String = "http://localhost:3000",
+        iosAppBundleID: String = "com.example.TriviaBrowser",
+        iosProjectPath: String = "~/trivial/trivia-browser-ios/TriviaBrowser.xcodeproj"
     ) {
         self.serverURL = serverURL
         self.apiKey = apiKey
@@ -30,5 +34,7 @@ struct MonitorConfig {
         self.daemonStatsPath = daemonStatsPath
         self.triviaBasePath = triviaBasePath
         self.webFrontendURL = webFrontendURL
+        self.iosAppBundleID = iosAppBundleID
+        self.iosProjectPath = (iosProjectPath as NSString).expandingTildeInPath
     }
 }

@@ -80,6 +80,9 @@ class Dashboard: @unchecked Sendable {
         case "w":
             openWebFrontend()
             setStatus("Opening web app...", duration: 2)
+        case "s":
+            launchIOSSimulator()
+            setStatus("Launching iOS Simulator...", duration: 3)
         case "q":
             isRunning = false
         default:
@@ -92,6 +95,42 @@ class Dashboard: @unchecked Sendable {
         process.executableURL = URL(fileURLWithPath: "/usr/bin/open")
         process.arguments = [config.webFrontendURL]
         try? process.run()
+    }
+
+    private func launchIOSSimulator() {
+        // First, open the Simulator app
+        let openSim = Process()
+        openSim.executableURL = URL(fileURLWithPath: "/usr/bin/open")
+        openSim.arguments = ["-a", "Simulator"]
+        try? openSim.run()
+        openSim.waitUntilExit()
+
+        // Try to launch the app in the booted simulator
+        let launch = Process()
+        launch.executableURL = URL(fileURLWithPath: "/usr/bin/xcrun")
+        launch.arguments = ["simctl", "launch", "booted", config.iosAppBundleID]
+
+        let pipe = Pipe()
+        launch.standardError = pipe
+
+        do {
+            try launch.run()
+            launch.waitUntilExit()
+
+            // If app not installed (exit code != 0), open Xcode project instead
+            if launch.terminationStatus != 0 {
+                let openXcode = Process()
+                openXcode.executableURL = URL(fileURLWithPath: "/usr/bin/open")
+                openXcode.arguments = [config.iosProjectPath]
+                try? openXcode.run()
+            }
+        } catch {
+            // Fallback: open Xcode project
+            let openXcode = Process()
+            openXcode.executableURL = URL(fileURLWithPath: "/usr/bin/open")
+            openXcode.arguments = [config.iosProjectPath]
+            try? openXcode.run()
+        }
     }
 
     private func setStatus(_ message: String, duration: TimeInterval) {

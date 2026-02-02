@@ -77,8 +77,8 @@ struct ANSIRenderer {
     static func headerBox(title: String, statusMessage: String? = nil) -> String {
         var result = ""
 
-        // Single line header: ═══ TRIVIA MONITOR ═══ [R:Refresh] [W:Web] [Q:Quit]
-        let hint = "[R:Refresh] [W:Web] [Q:Quit]"
+        // Single line header: ═══ TRIVIA MONITOR ═══ [R] [W] [S] [Q]
+        let hint = "[R:Refresh] [W:Web] [S:Sim] [Q:Quit]"
         let titlePart = "═══ \(title) ═══"
         let spacing = width - titlePart.count - hint.count + 2
         result += cyan(titlePart) + String(repeating: " ", count: max(1, spacing)) + gray(hint) + "\n"
