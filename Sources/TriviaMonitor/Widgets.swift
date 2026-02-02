@@ -110,45 +110,51 @@ struct Widgets {
 
             output += ANSIRenderer.sectionMiddle()
 
-            // Stats line
-            let fetchedStr = ANSIRenderer.cyan(String(daemon.totalFetched))
-            let addedStr = ANSIRenderer.green(String(daemon.questionsAdded))
-            let dupsStr = ANSIRenderer.yellow(String(daemon.duplicatesSkipped))
-            let errorsStr = daemon.errors > 0 ? ANSIRenderer.red(String(daemon.errors)) : String(daemon.errors)
+            // Summary stats line
+            let total = daemon.totalFetched
+            let successRate = total > 0 ? Double(daemon.questionsAdded) / Double(total) * 100 : 0
+            let rateStr = String(format: "%.1f%%", successRate)
 
-            let line2 = "Fetched: \(fetchedStr)   Added: \(addedStr)   Duplicates: \(dupsStr)   Errors: \(errorsStr)"
+            let line2 = "Total Fetched: \(ANSIRenderer.cyan(String(total)))    " +
+                       "Success Rate: \(ANSIRenderer.green(rateStr))    " +
+                       "Errors: \(daemon.errors > 0 ? ANSIRenderer.red(String(daemon.errors)) : "0")"
             output += ANSIRenderer.row(line2)
 
-            // Provider status (3 per row max)
+            output += ANSIRenderer.sectionMiddle()
+
+            // Breakdown with progress bars
+            let addedPct = total > 0 ? Int(Double(daemon.questionsAdded) / Double(total) * 100) : 0
+            let dupsPct = total > 0 ? Int(Double(daemon.duplicatesSkipped) / Double(total) * 100) : 0
+
+            let addedBar = ANSIRenderer.progressBar(value: daemon.questionsAdded, total: total, width: 20)
+            let dupsBar = ANSIRenderer.progressBar(value: daemon.duplicatesSkipped, total: total, width: 20)
+
+            let addedLine = ANSIRenderer.padRight("Added:", to: 12) +
+                           String(format: "%6d", daemon.questionsAdded) + " " + addedBar +
+                           String(format: " %3d%%", addedPct)
+            output += ANSIRenderer.row(addedLine)
+
+            let dupsLine = ANSIRenderer.padRight("Duplicates:", to: 12) +
+                          String(format: "%6d", daemon.duplicatesSkipped) + " " + dupsBar +
+                          String(format: " %3d%%", dupsPct)
+            output += ANSIRenderer.row(dupsLine)
+
+            // Provider status
             if !daemon.providers.isEmpty {
                 output += ANSIRenderer.sectionMiddle()
+                output += ANSIRenderer.row(ANSIRenderer.cyan("Providers:"))
 
-                // First row: up to 3 providers
-                var line1 = ""
-                for (index, provider) in daemon.providers.prefix(3).enumerated() {
+                for provider in daemon.providers {
                     let dot = ANSIRenderer.providerDot(enabled: provider.enabled)
-                    let status = provider.enabled ? "on" : "off"
-                    let name = String(provider.name.prefix(10))
-                    line1 += "\(dot) \(name) [\(status)]"
-                    if index < 2 && index < daemon.providers.count - 1 {
-                        line1 += "  "
+                    let status = provider.enabled ? ANSIRenderer.green("active") : ANSIRenderer.gray("off")
+                    let countStr: String
+                    if let count = provider.questionsAdded {
+                        countStr = "  (\(count) added)"
+                    } else {
+                        countStr = ""
                     }
-                }
-                output += ANSIRenderer.row(line1)
-
-                // Second row if more than 3 providers
-                if daemon.providers.count > 3 {
-                    var line2 = ""
-                    for (index, provider) in daemon.providers.dropFirst(3).prefix(3).enumerated() {
-                        let dot = ANSIRenderer.providerDot(enabled: provider.enabled)
-                        let status = provider.enabled ? "on" : "off"
-                        let name = String(provider.name.prefix(10))
-                        line2 += "\(dot) \(name) [\(status)]"
-                        if index < 2 && index < daemon.providers.count - 4 {
-                            line2 += "  "
-                        }
-                    }
-                    output += ANSIRenderer.row(line2)
+                    let line = "  \(dot) \(ANSIRenderer.padRight(provider.name, to: 14)) \(status)\(countStr)"
+                    output += ANSIRenderer.row(line)
                 }
             }
         } else {
