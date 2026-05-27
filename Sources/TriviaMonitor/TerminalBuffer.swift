@@ -1,43 +1,40 @@
 import Foundation
+import Darwin
 
-/// Double-buffered terminal output - redraws entire screen each time for clean display
+/// Simple terminal output - clears screen and redraws everything each time
 class TerminalBuffer {
-    private var previousLineCount = 0
+    private var isFirstRender = true
 
-    /// Render content with full screen clear to avoid ghost lines
+    /// Render content with full screen clear
     func render(_ lines: [String]) {
-        // Move cursor to home position
-        print("\u{001B}[H", terminator: "")
+        // Use low-level write() which is more reliable in raw terminal mode
+        let fd = STDOUT_FILENO
 
-        // Render all lines, clearing each line first
-        for (index, line) in lines.enumerated() {
-            // Move to line, clear it, print content
-            print("\u{001B}[\(index + 1);1H\u{001B}[2K\(line)", terminator: "")
+        // Clear screen and home cursor
+        let clear = "\u{001B}[2J\u{001B}[H"
+        _ = clear.withCString { ptr in
+            Darwin.write(fd, ptr, strlen(ptr))
         }
 
-        // Clear any remaining lines from previous render
-        if lines.count < previousLineCount {
-            for i in lines.count..<previousLineCount {
-                print("\u{001B}[\(i + 1);1H\u{001B}[2K", terminator: "")
+        // Write each line
+        for line in lines {
+            let lineWithNewline = line + "\n"
+            _ = lineWithNewline.withCString { ptr in
+                Darwin.write(fd, ptr, strlen(ptr))
             }
         }
-
-        // Move cursor below content
-        print("\u{001B}[\(lines.count + 1);1H", terminator: "")
-        fflush(stdout)
-
-        previousLineCount = lines.count
     }
 
     /// Force a full redraw on next render
     func invalidate() {
-        previousLineCount = 0
+        isFirstRender = true
     }
 
     /// Clear screen completely
     func clear() {
-        print("\u{001B}[2J\u{001B}[H", terminator: "")
-        fflush(stdout)
-        previousLineCount = 0
+        let clear = "\u{001B}[2J\u{001B}[H"
+        _ = clear.withCString { ptr in
+            Darwin.write(STDOUT_FILENO, ptr, strlen(ptr))
+        }
     }
 }

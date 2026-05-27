@@ -142,13 +142,13 @@ struct Widgets {
             // Provider status with detailed counts
             if !daemon.providers.isEmpty {
                 output += ANSIRenderer.sectionMiddle()
-                // Header row
-                let header = ANSIRenderer.padRight("Provider", to: 14) +
-                            ANSIRenderer.padRight("Fetched", to: 10) +
-                            ANSIRenderer.padRight("Added", to: 10) +
-                            ANSIRenderer.padRight("Dups", to: 10) +
-                            "Errors"
-                output += ANSIRenderer.row(ANSIRenderer.cyan(header))
+                // Header row - use same widths as data
+                let hdrName = ANSIRenderer.padRight("Provider", to: 16)
+                let hdrFetched = ANSIRenderer.padRight("Fetched", to: 9)
+                let hdrAdded = ANSIRenderer.padRight("Added", to: 9)
+                let hdrDups = ANSIRenderer.padRight("Dups", to: 9)
+                let hdrErrs = "Errs"
+                output += ANSIRenderer.row(ANSIRenderer.cyan(hdrName + hdrFetched + hdrAdded + hdrDups + hdrErrs))
 
                 for provider in daemon.providers {
                     let dot = ANSIRenderer.providerDot(enabled: provider.enabled)
@@ -157,13 +157,19 @@ struct Widgets {
                     let dups = provider.duplicates ?? 0
                     let errs = provider.errors ?? 0
 
-                    let nameCol = "\(dot) " + ANSIRenderer.padRight(provider.name, to: 12)
-                    let fetchedCol = ANSIRenderer.padRight(String(fetched), to: 10)
-                    let addedCol = ANSIRenderer.padRight(ANSIRenderer.green(String(added)), to: 10 + 9) // +9 for ANSI codes
-                    let dupsCol = ANSIRenderer.padRight(ANSIRenderer.yellow(String(dups)), to: 10 + 9)
-                    let errsCol = errs > 0 ? ANSIRenderer.red(String(errs)) : "0"
+                    // Pad values BEFORE adding color codes
+                    let nameCol = "\(dot) " + ANSIRenderer.padRight(provider.name, to: 14)
+                    let fetchedCol = ANSIRenderer.padRight(String(fetched), to: 9)
+                    let addedCol = ANSIRenderer.padRight(String(added), to: 9)
+                    let dupsCol = ANSIRenderer.padRight(String(dups), to: 9)
+                    let errsCol = String(errs)
 
-                    let line = nameCol + fetchedCol + addedCol + dupsCol + errsCol
+                    // Apply colors after padding
+                    let coloredAdded = ANSIRenderer.green(addedCol)
+                    let coloredDups = dups > 0 ? ANSIRenderer.yellow(dupsCol) : dupsCol
+                    let coloredErrs = errs > 0 ? ANSIRenderer.red(errsCol) : errsCol
+
+                    let line = nameCol + fetchedCol + coloredAdded + coloredDups + coloredErrs
                     output += ANSIRenderer.row(line)
                 }
             }
